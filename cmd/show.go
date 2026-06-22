@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/andrewstuart/thg/db"
+	"github.com/andrew-craig/thg/db"
 )
 
 var showCmd = &cobra.Command{

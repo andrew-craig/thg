@@ -1,4 +1,4 @@
-module github.com/andrewstuart/thg
+module github.com/andrew-craig/thg
 
 go 1.25.5
 
