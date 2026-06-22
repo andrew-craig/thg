@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/andrewstuart/thg/format"
+	"github.com/andrew-craig/thg/format"
 )
 
 var (

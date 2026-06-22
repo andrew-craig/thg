@@ -61,7 +61,7 @@ go build -o thg .
 ### With `go install`
 
 ```bash
-go install github.com/andrewstuart/thg@latest
+go install github.com/andrew-craig/thg@latest
 ```
 
 This installs `thg` into `$(go env GOPATH)/bin` — make sure that directory is

@@ -5,9 +5,9 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/andrewstuart/thg/config"
-	"github.com/andrewstuart/thg/db"
-	"github.com/andrewstuart/thg/things"
+	"github.com/andrew-craig/thg/config"
+	"github.com/andrew-craig/thg/db"
+	"github.com/andrew-craig/thg/things"
 )
 
 var (
