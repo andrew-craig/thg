@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. v0.1.0)'
+        required: true
 
 permissions:
   contents: write
@@ -20,19 +25,23 @@ jobs:
         with:
           go-version-file: go.mod
 
+      - name: Resolve version
+        id: version
+        run: echo "value=${{ github.event.inputs.version || github.ref_name }}" >> $GITHUB_OUTPUT
+
       - name: Build macOS arm64
         env:
           GOOS: darwin
           GOARCH: arm64
         run: |
-          go build -ldflags "-s -w -X main.version=${GITHUB_REF_NAME}" -o thg-darwin-arm64 .
+          go build -ldflags "-s -w -X main.version=${{ steps.version.outputs.value }}" -o thg-darwin-arm64 .
 
       - name: Build macOS amd64
         env:
           GOOS: darwin
           GOARCH: amd64
         run: |
-          go build -ldflags "-s -w -X main.version=${GITHUB_REF_NAME}" -o thg-darwin-amd64 .
+          go build -ldflags "-s -w -X main.version=${{ steps.version.outputs.value }}" -o thg-darwin-amd64 .
 
       - name: Create checksums
         run: shasum -a 256 thg-darwin-* > checksums.txt
@@ -40,6 +49,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.version.outputs.value }}
           generate_release_notes: true
           files: |
             thg-darwin-arm64
