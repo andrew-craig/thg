@@ -34,24 +34,29 @@ jobs:
           GOOS: darwin
           GOARCH: arm64
         run: |
-          go build -ldflags "-s -w -X main.version=${{ steps.version.outputs.value }}" -o thg-darwin-arm64 .
+          go build -ldflags "-s -w -X main.version=${{ steps.version.outputs.value }}" -o thg .
+          tar -czf thg-darwin-arm64.tar.gz thg
+          rm thg
 
       - name: Build macOS amd64
         env:
           GOOS: darwin
           GOARCH: amd64
         run: |
-          go build -ldflags "-s -w -X main.version=${{ steps.version.outputs.value }}" -o thg-darwin-amd64 .
+          go build -ldflags "-s -w -X main.version=${{ steps.version.outputs.value }}" -o thg .
+          tar -czf thg-darwin-amd64.tar.gz thg
+          rm thg
 
       - name: Create checksums
-        run: shasum -a 256 thg-darwin-* > checksums.txt
+        run: shasum -a 256 thg-darwin-*.tar.gz > checksums.txt
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.value }}
           generate_release_notes: true
+          overwrite: true
           files: |
-            thg-darwin-arm64
-            thg-darwin-amd64
+            thg-darwin-arm64.tar.gz
+            thg-darwin-amd64.tar.gz
             checksums.txt
