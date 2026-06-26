@@ -2,3 +2,6 @@ things.sqlite
 things.sqlite-shm
 things.sqlite-wal
 thg
+
+# GoReleaser build output
+dist/
