@@ -40,7 +40,25 @@ Completed: Review pull request
 
 ## Installation
 
-### Build from source (recommended)
+### Homebrew (recommended)
+
+```bash
+brew install andrew-craig/tap/thg
+```
+
+This installs the latest release for your Mac (Apple Silicon or Intel). Upgrade
+later with `brew upgrade thg`.
+
+### With `go install`
+
+```bash
+go install github.com/andrew-craig/thg@latest
+```
+
+This installs `thg` into `$(go env GOPATH)/bin` — make sure that directory is
+on your `PATH`.
+
+### Build from source
 
 ```bash
 git clone https://github.com/andrew-craig/thg.git
@@ -57,15 +75,6 @@ To build without installing:
 go build -o thg .
 ./thg --help
 ```
-
-### With `go install`
-
-```bash
-go install github.com/andrew-craig/thg@latest
-```
-
-This installs `thg` into `$(go env GOPATH)/bin` — make sure that directory is
-on your `PATH`.
 
 ## Configuration
 
