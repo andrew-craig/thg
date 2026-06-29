@@ -1,0 +1,85 @@
+# GoReleaser configuration for thg.
+# Docs: https://goreleaser.com
+version: 2
+
+project_name: thg
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - id: thg
+    main: .
+    binary: thg
+    # modernc.org/sqlite is pure Go, so cgo is not needed and the binary
+    # cross-compiles cleanly for both macOS architectures.
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X main.version={{ .Version }}
+
+# Sign and notarize the macOS binaries (via quill, no macOS runner needed).
+# Runs after the build and before archiving, so the signed binary is what ends
+# up in the tarball and the cask. Gated on MACOS_SIGN_P12 so snapshot/local
+# builds and PRs without the secrets skip signing instead of failing.
+notarize:
+  macos:
+    - enabled: '{{ isEnvSet "MACOS_SIGN_P12" }}'
+      ids:
+        - thg
+      sign:
+        # Developer ID Application cert + key as a base64-encoded .p12.
+        certificate: "{{ .Env.MACOS_SIGN_P12 }}"
+        password: "{{ .Env.MACOS_SIGN_PASSWORD }}"
+      notarize:
+        # App Store Connect API key (base64-encoded .p8) plus its identifiers.
+        key: "{{ .Env.MACOS_NOTARY_KEY }}"
+        key_id: "{{ .Env.MACOS_NOTARY_KEY_ID }}"
+        issuer_id: "{{ .Env.MACOS_NOTARY_ISSUER_ID }}"
+        wait: true
+        timeout: 20m
+
+archives:
+  - id: thg
+    formats: [tar.gz]
+    name_template: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
+
+checksum:
+  name_template: checksums.txt
+
+release:
+  github:
+    owner: andrew-craig
+    name: thg
+  # Let GitHub generate notes from merged PRs / commits since the last tag.
+  mode: append
+
+# Casks (not formulae): the `brews` key is deprecated, and casks let Homebrew
+# strip the Gatekeeper quarantine attribute on install — so the binary runs
+# without the "unidentified developer" prompt even before notarization.
+homebrew_casks:
+  - name: thg
+    binaries:
+      - thg
+    repository:
+      owner: andrew-craig
+      name: homebrew-tap
+      # The default GITHUB_TOKEN cannot push to a separate repo, so the tap
+      # uses its own token (set as the HOMEBREW_TAP_TOKEN secret in CI).
+      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
+    commit_author:
+      name: goreleaser-bot
+      email: goreleaser-bot@users.noreply.github.com
+    homepage: "https://github.com/andrew-craig/thg"
+    description: "Command-line interface for reading and writing tasks in Things 3"
+
+changelog:
+  use: github
