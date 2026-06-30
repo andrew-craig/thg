@@ -58,15 +58,17 @@ func (t Task) StatusText() string {
 	}
 }
 
-// WhenText returns a human-readable when value.
+// WhenText returns a human-readable when value. Membership in Today is derived
+// from the scheduled startDate (today or overdue), not todayIndex, which is
+// only a sort key and unreliable for this purpose.
 func (t Task) WhenText() string {
-	if t.TodayIndex > 0 {
-		return "today"
-	}
 	if t.Start == 2 {
 		return "someday"
 	}
 	if t.StartDate > 0 {
+		if t.StartDate <= TodayEncoded() {
+			return "today"
+		}
 		return FormatDate(t.StartDate)
 	}
 	if t.Start == 1 {
@@ -115,13 +117,20 @@ func scanTasks(rows *sql.Rows) ([]Task, error) {
 	return tasks, rows.Err()
 }
 
-// ListToday returns tasks in the Today list.
+// ListToday returns tasks in the Today list: to-dos scheduled (start=1) for
+// today or earlier (overdue tasks roll into Today). todayIndex is only the
+// manual sort order — it is negative for genuine Today tasks and retains stale
+// positive values on tasks that have left Today, so it must not be used to
+// determine membership.
 func ListToday(db *sql.DB) ([]Task, error) {
+	today := TodayEncoded()
 	query := fmt.Sprintf(`SELECT %s %s
 		WHERE t.type = 0 AND t.status = 0 AND t.trashed = 0
-		AND t.todayIndex > 0
+		AND COALESCE(p.trashed, 0) = 0
+		AND t.start = 1
+		AND t.startDate > 0 AND t.startDate <= ?
 		ORDER BY t.todayIndex`, taskColumns, taskJoins)
-	rows, err := db.Query(query)
+	rows, err := db.Query(query, today)
 	if err != nil {
 		return nil, err
 	}
@@ -150,6 +159,7 @@ func ListInbox(db *sql.DB) ([]Task, error) {
 func ListSomeday(db *sql.DB) ([]Task, error) {
 	query := fmt.Sprintf(`SELECT %s %s
 		WHERE t.type = 0 AND t.status = 0 AND t.trashed = 0
+		AND COALESCE(p.trashed, 0) = 0
 		AND t.start = 2
 		ORDER BY t."index"`, taskColumns, taskJoins)
 	rows, err := db.Query(query)
@@ -165,6 +175,7 @@ func ListUpcoming(db *sql.DB) ([]Task, error) {
 	today := TodayEncoded()
 	query := fmt.Sprintf(`SELECT %s %s
 		WHERE t.type = 0 AND t.status = 0 AND t.trashed = 0
+		AND COALESCE(p.trashed, 0) = 0
 		AND COALESCE(t.startDate, 0) > ?
 		ORDER BY t.startDate, t."index"`, taskColumns, taskJoins)
 	rows, err := db.Query(query, today)
@@ -179,6 +190,7 @@ func ListUpcoming(db *sql.DB) ([]Task, error) {
 func ListAll(db *sql.DB) ([]Task, error) {
 	query := fmt.Sprintf(`SELECT %s %s
 		WHERE t.type = 0 AND t.status = 0 AND t.trashed = 0
+		AND COALESCE(p.trashed, 0) = 0
 		ORDER BY t."index"`, taskColumns, taskJoins)
 	rows, err := db.Query(query)
 	if err != nil {
@@ -206,6 +218,7 @@ func ListByProject(database *sql.DB, projectUUID string) ([]Task, error) {
 func ListByArea(db *sql.DB, areaUUID string) ([]Task, error) {
 	query := fmt.Sprintf(`SELECT %s %s
 		WHERE t.type = 0 AND t.status = 0 AND t.trashed = 0
+		AND COALESCE(p.trashed, 0) = 0
 		AND (t.area = ? OR p.area = ?)
 		ORDER BY t."index"`, taskColumns, taskJoins)
 	rows, err := db.Query(query, areaUUID, areaUUID)
@@ -221,6 +234,7 @@ func ListByTag(db *sql.DB, tagUUID string) ([]Task, error) {
 	query := fmt.Sprintf(`SELECT %s %s
 		JOIN TMTaskTag tt ON tt.tasks = t.uuid
 		WHERE t.type = 0 AND t.status = 0 AND t.trashed = 0
+		AND COALESCE(p.trashed, 0) = 0
 		AND tt.tags = ?
 		ORDER BY t."index"`, taskColumns, taskJoins)
 	rows, err := db.Query(query, tagUUID)
