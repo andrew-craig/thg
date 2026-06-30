@@ -53,7 +53,3 @@ writes. Writing to the live database directly risks corrupting it.
 - Read-only access to the live database works while Things is running (SQLite
   WAL mode). For a clean *copy*, Things should not be writing during the copy.
 
-## Issue Tracking
-
-This project uses **bd (beads)** for issue tracking — see
-[AGENTS.md](AGENTS.md). Do not introduce parallel markdown TODO lists.
