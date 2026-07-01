@@ -8,7 +8,7 @@ the official `things:///` URL scheme — so reads are instant and writes go
 through Things itself, keeping your data safe.
 
 ```console
-$ thg
+$ thg list
 ID      Title                     Project        When     Deadline
 a1b2c3  Review pull request       thg            Today
 d4e5f6  Buy milk                                 Today
@@ -99,12 +99,13 @@ container. If you keep it elsewhere, set `THG_DB_PATH` to the full path of
 
 ## Usage
 
-Running `thg` with no arguments shows your Today list.
+Running `thg` with no arguments shows the help content. Use `thg list` for
+your Today list.
 
 ### Listing and viewing
 
 ```bash
-thg                       # Today (default)
+thg list                  # Today (default)
 thg list inbox            # Inbox
 thg list someday          # Someday
 thg list upcoming         # Scheduled / upcoming

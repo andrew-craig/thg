@@ -22,8 +22,8 @@ var rootCmd = &cobra.Command{
 		printer = &format.Printer{JSON: jsonOutput}
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// Default: show today list
-		return listRun("today")
+		// No subcommand given: show help.
+		return cmd.Help()
 	},
 }
 

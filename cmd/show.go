@@ -13,8 +13,19 @@ import (
 var showCmd = &cobra.Command{
 	Use:   "show <id-or-title>",
 	Short: "Show task details",
-	Args:  cobra.ExactArgs(1),
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			return nil
+		}
+		return cobra.ExactArgs(1)(cmd, args)
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			_ = cmd.Help()
+			cmd.SilenceUsage = true
+			return fmt.Errorf("missing required argument: <id-or-title>")
+		}
+
 		database, err := db.Open()
 		if err != nil {
 			return err

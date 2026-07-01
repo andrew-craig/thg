@@ -25,8 +25,19 @@ var (
 var updateCmd = &cobra.Command{
 	Use:   "update <id>",
 	Short: "Update a task",
-	Args:  cobra.ExactArgs(1),
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			return nil
+		}
+		return cobra.ExactArgs(1)(cmd, args)
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			_ = cmd.Help()
+			cmd.SilenceUsage = true
+			return fmt.Errorf("missing required argument: <id>")
+		}
+
 		token, err := config.LoadAuthToken(updateAuthToken)
 		if err != nil {
 			return err
