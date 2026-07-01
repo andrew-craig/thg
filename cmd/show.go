@@ -21,7 +21,9 @@ var showCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if len(args) == 0 {
-			return cmd.Help()
+			_ = cmd.Help()
+			cmd.SilenceUsage = true
+			return fmt.Errorf("missing required argument: <id-or-title>")
 		}
 
 		database, err := db.Open()
