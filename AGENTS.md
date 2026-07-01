@@ -32,9 +32,10 @@ writes. Writing to the live database directly risks corrupting it.
 
 ## Commands
 
-`thg` (default: today), `list`, `show`, `add`, `done`, `update`, `areas`,
-`projects`, `tags`. Each maps to a file in `cmd/`. The default command and
-`list` read the database; `add`, `done`, and `update` write via the URL scheme.
+`thg` (default: help), `list`, `show`, `add`, `done`, `update`, `areas`,
+`projects`, `tags`. Each maps to a file in `cmd/`. `list`, `show`, `areas`,
+`projects`, and `tags` read the database; `add`, `done`, and `update` write
+via the URL scheme.
 
 ## Conventions
 

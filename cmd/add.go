@@ -23,8 +23,12 @@ var (
 var addCmd = &cobra.Command{
 	Use:   "add <title>",
 	Short: "Add a new task",
-	Args:  cobra.MinimumNArgs(1),
+	Args:  cobra.ArbitraryArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			return cmd.Help()
+		}
+
 		title := strings.Join(args, " ")
 
 		params := map[string]string{

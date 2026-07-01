@@ -25,8 +25,17 @@ var (
 var updateCmd = &cobra.Command{
 	Use:   "update <id>",
 	Short: "Update a task",
-	Args:  cobra.ExactArgs(1),
+	Args: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			return nil
+		}
+		return cobra.ExactArgs(1)(cmd, args)
+	},
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) == 0 {
+			return cmd.Help()
+		}
+
 		token, err := config.LoadAuthToken(updateAuthToken)
 		if err != nil {
 			return err
